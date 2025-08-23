@@ -21,14 +21,10 @@ jobs:
             libblas=*=*openblas
             vs2022_win-64
 
-      - name: conda info
-        shell: cmd /C CALL {0}
-        run: >-
-          conda info && conda list
-
       - name: create DLL
         shell: cmd /C CALL {0}
         run: >-
+          echo %CONDA_PREFIX%
           python create_dll_forwarder.py %CONDA_PREFIX%/Library/bin/openblas.dll %CONDA_PREFIX%/Library/bin/libblas.dll
           copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/libcblas.dll
           copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/liblapack.dll
