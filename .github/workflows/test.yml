@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: test-env
+          create-args: >-
+            python
+            numpy
+            libblas=*=*openblas
+            vs2022_win-64
+
+      - name: conda info
+        shell: cmd /C CALL {0}
+        run: >-
+          conda info && conda list
+
+      - name: create DLL
+        shell: cmd /C CALL {0}
+        run: >-
+          python create_dll_forwarder.py %CONDA_PREFIX%/Library/bin/openblas.dll %CONDA_PREFIX%/Library/bin/libblas.dll
+          copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/libcblas.dll
+          copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/liblapack.dll
+          copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/liblapacke.dll
+
+      - name: run test
+        shell: cmd /C CALL {0}
+        run: >-
+          python -c "import numpy"
