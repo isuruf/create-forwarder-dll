@@ -71,10 +71,10 @@ def main(args):
     f.write("EXPORTS\n")
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
-  print(run("link.exe --help"))
-  print(run("where link.exe"))
-  print(run("where cl.exe"))
-  run(f"link.exe /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
+
+  cl_exe = run("where cl.exe")
+  link_exe = os.path.join(os.path.dirname(cl_exe), "link.exe")
+  run(f"{link_exe} /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
   run(f"copy {output}.dll {output_dll}")
 
 if __name__ == "__main__":

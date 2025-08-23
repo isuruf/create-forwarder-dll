@@ -35,7 +35,6 @@ jobs:
           del /Q "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
-          del /Q "C:\Program Files\Git\usr\bin\link.exe"
           echo %CONDA_PREFIX%
           python create_forwarder_dll.py "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
