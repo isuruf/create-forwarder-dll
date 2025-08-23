@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ilammy/msvc-dev-cmd@v1
+
       - uses: mamba-org/setup-micromamba@v2
         with:
           environment-name: test-env
@@ -20,7 +22,6 @@ jobs:
             python
             numpy
             libblas=*=*openblas
-            vs2022_win-64
 
       - name: micromamba info (cmd.exe)
         shell: cmd /C CALL {0}
@@ -29,6 +30,8 @@ jobs:
       - name: create DLL
         shell: cmd /C CALL {0}
         run: >-
+          del /Q %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/libcblas.dll
+          del /Q %CONDA_PREFIX%/Library/bin/liblapack.dll %CONDA_PREFIX%/Library/bin/liblapacke.dll
           echo %CONDA_PREFIX%
           python create_dll_forwarder.py %CONDA_PREFIX%/Library/bin/openblas.dll %CONDA_PREFIX%/Library/bin/libblas.dll
           copy %CONDA_PREFIX%/Library/bin/libblas.dll %CONDA_PREFIX%/Library/bin/libcblas.dll
