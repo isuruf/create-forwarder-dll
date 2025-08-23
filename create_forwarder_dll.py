@@ -22,12 +22,12 @@ def main(args):
   input_dll = args.input
   input_dir = os.path.dirname(args.input)
   assert input_dll.endswith(".dll")
-  input = input_dll[:-4]
+  input = os.path.basename(input_dll)[:-4]
 
   output_dll = args.output
   output_dir = os.path.dirname(args.output)
   assert output_dll.endswith(".dll")
-  output = output_dll[:-4]
+  output = os.path.basename(output_dll)[:-4]
   
   if args.arch.lower() == "amd64":
     machine = "x64"
