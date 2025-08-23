@@ -43,7 +43,7 @@ def main(args):
   run("cl.exe /c empty.c")
 
   # extract symbols from input
-  dump = run(f"dumpbin /EXPORTS {input_dll}")
+  dump = run(f"dumpbin /EXPORTS {input_dir}/{input_dll}")
   started = False
   symbols = []
   for line in dump.splitlines():
@@ -73,7 +73,7 @@ def main(args):
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
   run(f"link.exe /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
-  run(f"copy {output}.dll {output_dll}")
+  run(f"copy {output}.dll {output_dir}/{output_dll}")
 
 if __name__ == "__main__":
   import tempfile
