@@ -71,7 +71,7 @@ def main(args):
     f.write("EXPORTS\n")
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
-  run("link.exe --help")
+  print(run("link.exe --help"))
   run(f"link.exe /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
   run(f"copy {output}.dll {output_dll}")
 
