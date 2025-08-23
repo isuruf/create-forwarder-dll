@@ -15,11 +15,16 @@ jobs:
       - uses: mamba-org/setup-micromamba@v2
         with:
           environment-name: test-env
+          init-shell: cmd.exe
           create-args: >-
             python
             numpy
             libblas=*=*openblas
             vs2022_win-64
+
+      - name: micromamba info (cmd.exe)
+        shell: cmd /C CALL {0}
+        run: micromamba info
 
       - name: create DLL
         shell: cmd /C CALL {0}
