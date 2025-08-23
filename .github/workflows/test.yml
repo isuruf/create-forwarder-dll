@@ -22,6 +22,7 @@ jobs:
             python
             numpy
             libblas=*=*openblas
+            liblapacke=*=*openblas
 
       - name: micromamba info (cmd.exe)
         shell: cmd /C CALL {0}
