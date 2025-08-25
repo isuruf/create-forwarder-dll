@@ -8,7 +8,8 @@ PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE", "")
 def run(arg):
   return subprocess.check_output(arg, shell=True).decode("utf-8")
 
-def main(args):
+
+def parse_args(args):
   parser = argparse.ArgumentParser(
     prog='create_dll_forwarder',
     description='Create a DLL that forwards to another DLL',
@@ -16,9 +17,11 @@ def main(args):
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
   parser.add_argument('--arch', default=PROCESSOR_ARCHITECTURE)
+  parser.add_argument('--no-temp-dir', action='store_true')
+  return parser.parse_args(args)
 
-  args = parser.parse_args(args)
 
+def main(args):
   input_dll = args.input
   input_dir = os.path.dirname(args.input)
   assert input_dll.endswith(".dll")
@@ -78,7 +81,11 @@ def main(args):
   run(f"copy {output}.dll {output_dll}")
 
 if __name__ == "__main__":
-  import tempfile
-  with tempfile.TemporaryDirectory() as tmpdir:
-     os.chdir(tmpdir)
-     main(sys.argv[1:])
+  args = parse_args(sys.argv[1:])
+  if args.no_temp_dir:
+     main(args)
+  else:
+     import tempfile
+     with tempfile.TemporaryDirectory() as tmpdir:
+         os.chdir(tmpdir)
+         main(args)
