@@ -23,6 +23,7 @@ jobs:
             numpy
             libblas=*=*openblas
             liblapacke=*=*openblas
+            pip
 
       - name: micromamba info (cmd.exe)
         shell: cmd /C CALL {0}
@@ -36,7 +37,8 @@ jobs:
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
           echo %CONDA_PREFIX%
-          python create_forwarder_dll.py "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" --no-temp-dir
+          pip install . -vv
+          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" --no-temp-dir
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
