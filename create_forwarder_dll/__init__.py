@@ -41,14 +41,12 @@ def parse_args(args):
   return parser.parse_args(args)
 
 
-def main(args):
-  input_dll = args.input
-  input_dir = os.path.dirname(args.input)
+def create(input_dll, output_dll, machine):
+  input_dir = os.path.dirname(input_dll)
   assert input_dll.endswith(".dll")
   input = os.path.basename(input_dll)[:-4]
 
-  output_dll = args.output
-  output_dir = os.path.dirname(args.output)
+  output_dir = os.path.dirname(output_dll)
   assert output_dll.endswith(".dll")
   output = os.path.basename(output_dll)[:-4]
   
@@ -77,7 +75,7 @@ def main(args):
       f.write(f"  {symbol}\n")
       
   # create import library with that list of symbols
-  run(f"lib /def:{input}.def /out:{input}.lib /MACHINE:{args.machine}")
+  run(f"lib /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
   
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
@@ -88,15 +86,20 @@ def main(args):
 
   cl_exe = run("where cl.exe")
   link_exe = os.path.join(os.path.dirname(cl_exe), "link.exe")
-  run(f"\"{link_exe}\" /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{args.machine} empty.obj {input}.lib")
+  run(f"\"{link_exe}\" /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
   run(f"copy {output}.dll {output_dll}")
 
-if __name__ == "__main__":
+
+def main():
   args = parse_args(sys.argv[1:])
   if args.no_temp_dir:
-     main(args)
+     create(args.input, args.output, args.machine)
   else:
      import tempfile
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         main(args)
+         create(args.input, args.output, args.machine)
+
+
+if __name__ == "__main__":
+  main()

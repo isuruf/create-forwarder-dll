@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=65", "setuptools_scm[toml]>=8.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "create_forwarder_dll/_version.py"
+
+[project]
+name = "create-forwarder-dll"
+description = "Creates a DLL that forwards all the symbols to another DLL"
+license = {text = "BSD-3-Clause"}
+authors = [
+    {name = "Isuru Fernando", email = "isuruf@gmail.com"},
+]
+requires-python = ">=3"
+# needed for setuptools_scm, we don't define a static version
+dynamic = ["version"]
+
+[project.urls]
+repository = "https://github.com/isuruf/create-forwarder-dll"
+
+[project.scripts]
+create-forwarder-dll = "create_forwarder_dll:main"
+

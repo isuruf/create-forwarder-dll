@@ -1,0 +1,5 @@
+build
+*.egg-info
+*.pyc
+dist
+create_forwarder_dll/_version.py
