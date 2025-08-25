@@ -23,7 +23,7 @@ def run(arg):
 
 
 def get_machine_default():
-  if target_platform:
+  if target_platform and target_platform != "noarch":
     return target_platform_map[target_platform]
   else:
     return processor_architecture_map.get(PROCESSOR_ARCHITECTURE.lower(), "")
