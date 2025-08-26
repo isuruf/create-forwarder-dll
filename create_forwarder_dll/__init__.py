@@ -99,7 +99,7 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  compiler.spawn([link_exe, "/DLL", f"/OUT:{output_dll}", f"/DEF:{output}.def", f"/MACHINE:{machine}", "empty.obj", f"{input}.lib")
+  compiler.spawn([link_exe, "/DLL", f"/OUT:{output_dll}", f"/DEF:{output}.def", f"/MACHINE:{machine}", "empty.obj", f"{input}.lib"])
 
 
 def main():
