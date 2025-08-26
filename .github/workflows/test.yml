@@ -12,8 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ilammy/msvc-dev-cmd@v1
-
       - uses: mamba-org/setup-micromamba@v2
         with:
           environment-name: test-env

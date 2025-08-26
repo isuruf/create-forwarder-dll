@@ -18,6 +18,14 @@ processor_architecture_map = {
   "x86": "X86",
 }
 
+
+def get_compiler():
+  from distutils._msvccompiler import MSVCCompiler
+  m = MSVCCompiler()
+  m.initialize()
+  return m
+
+
 def run(arg):
   return subprocess.check_output(arg, shell=True).decode("utf-8")
 
@@ -52,7 +60,8 @@ def create(input_dll, output_dll, machine):
   
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
-  run("cl.exe /c empty.c")
+  compiler = get_compiler()
+  run(f"{repr(compiler.cl)} /c empty.c")
 
   # extract symbols from input
   dump = run(f"dumpbin /EXPORTS {input_dll}")
@@ -75,7 +84,7 @@ def create(input_dll, output_dll, machine):
       f.write(f"  {symbol}\n")
       
   # create import library with that list of symbols
-  run(f"lib /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
+  run(f"{repr(compiler.lib)} /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
   
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
@@ -84,9 +93,7 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  cl_exe = run("where cl.exe")
-  link_exe = os.path.join(os.path.dirname(cl_exe), "link.exe")
-  run(f"\"{link_exe}\" /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
+  run(f"{repr(compiler.linker)} /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
   run(f"copy {output}.dll {output_dll}")
 
 
