@@ -61,7 +61,7 @@ def create(input_dll, output_dll, machine):
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
   compiler = get_compiler()
-  run(f"{repr(compiler.cc)} /c empty.c")
+  run(f"\"{compiler.cc}\" /c empty.c")
 
   # extract symbols from input
   dump = run(f"dumpbin /EXPORTS {input_dll}")
@@ -84,7 +84,7 @@ def create(input_dll, output_dll, machine):
       f.write(f"  {symbol}\n")
       
   # create import library with that list of symbols
-  run(f"{repr(compiler.lib)} /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
+  run(f"\"{compiler.lib}\" /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
   
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
@@ -93,7 +93,7 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  run(f"{repr(compiler.linker)} /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
+  run(f"\"{compiler.linker}\" /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
   run(f"copy {output}.dll {output_dll}")
 
 
