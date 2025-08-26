@@ -64,7 +64,6 @@ def create(input_dll, output_dll, machine):
   cl_exe = compiler.cc
   cl_dir = os.path.dirname(cl_exe)
   lib_exe = os.path.join(cl_dir, "lib.exe")
-  link_exe = os.path.join(cl_dir, "link.exe")
   dumpbin_exe = os.path.join(cl_dir, "dumpbin.exe")
 
   compiler.spawn([cl_exe, "/c", "empty.c"])
@@ -99,7 +98,7 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  compiler.spawn([link_exe, "/DLL", f"/OUT:{output_dll}", f"/DEF:{output}.def", f"/MACHINE:{machine}", "empty.obj", f"{input}.lib"])
+  compiler.link(compiler.SHARED_LIBRARY, output_filename=output_dll, extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"], objects=["empty.obj", f"{input}.lib"])
 
 
 def main():
