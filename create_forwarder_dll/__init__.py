@@ -19,11 +19,11 @@ processor_architecture_map = {
 }
 
 
-def get_cl():
+def get_compiler():
   from distutils._msvccompiler import MSVCCompiler
   m = MSVCCompiler()
   m.initialize()
-  return m.cc
+  return m
 
 
 def run(arg):
@@ -60,13 +60,14 @@ def create(input_dll, output_dll, machine):
   
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
-  cl_exe = get_cl()
+  compiler = get_compiler()
+  cl_exe = compiler.cc
   cl_dir = os.path.dirname(cl_exe)
   lib_exe = os.path.join(cl_dir, "lib.exe")
   link_exe = os.path.join(cl_dir, "link.exe")
   dumpbin_exe = os.path.join(cl_dir, "dumpbin.exe")
 
-  run(f"\"{cl_exe}\" /c empty.c")
+  compiler.spawn([cl_exe, "/c", "empty.c"])
 
   # extract symbols from input
   dump = run(f"\"{dumpbin_exe}\" /EXPORTS {input_dll}")
@@ -89,7 +90,7 @@ def create(input_dll, output_dll, machine):
       f.write(f"  {symbol}\n")
       
   # create import library with that list of symbols
-  run(f"\"{lib_exe}\" /def:{input}.def /out:{input}.lib /MACHINE:{machine}")
+  compiler.spawn([lib_exe, f"/def:{input}.def", f"/out:{input}.lib", f"/MACHINE:{machine}"])
   
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
@@ -98,8 +99,7 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  run(f"\"{link_exe}\" /DLL /OUT:{output}.dll /DEF:{output}.def /MACHINE:{machine} empty.obj {input}.lib")
-  run(f"copy {output}.dll {output_dll}")
+  compiler.spawn([link_exe, "/DLL", f"/OUT:{output_dll}", f"/DEF:{output}.def", f"/MACHINE:{machine}", "empty.obj", f"{input}.lib")
 
 
 def main():
