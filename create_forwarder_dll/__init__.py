@@ -60,7 +60,7 @@ def create(input_dll, output_dll, machine):
   
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
-  cl_exe = get_compiler()
+  cl_exe = get_cl()
   cl_dir = os.path.dirname(cl_exe)
   lib_exe = os.path.join(cl_dir, "lib.exe")
   link_exe = os.path.join(cl_dir, "link.exe")
