@@ -98,7 +98,8 @@ def create(input_dll, output_dll, machine):
     for symbol in symbols:
       f.write(f"  {symbol} = {input}.{symbol}\n")
 
-  compiler.link(compiler.SHARED_LIBRARY, output_filename=output_dll, extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"], objects=["empty.obj", f"{input}.lib"])
+  compiler.link(compiler.SHARED_LIBRARY, output_filename=f"{output}.dll", extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"], objects=["empty.obj", f"{input}.lib"])
+  run(f"copy {output}.dll {output_dll}")
 
 
 def main():
