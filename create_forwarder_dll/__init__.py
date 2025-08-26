@@ -61,7 +61,7 @@ def create(input_dll, output_dll, machine):
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
   compiler = get_compiler()
-  run(f"{repr(compiler.cl)} /c empty.c")
+  run(f"{repr(compiler.cc)} /c empty.c")
 
   # extract symbols from input
   dump = run(f"dumpbin /EXPORTS {input_dll}")
