@@ -44,8 +44,8 @@ def parse_args(args):
   )
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
-  parser.add_argument('--machine', default=get_machine_default())
-  parser.add_argument('--no-temp-dir', action='store_true')
+  parser.add_argument('--machine', default=get_machine_default(), help="machine argument to cl.exe")
+  parser.add_argument('--no-temp-dir', action='store_true', help="Do not use a temporary directory to create intermediaries")
   return parser.parse_args(args)
 
 
