@@ -45,10 +45,14 @@ def parse_args(args):
   )
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
-  parser.add_argument('--implementing-library', default=None, help="When the `input` DLL is only the reference for the symbols, but the actual implementation for them is elsewhere")
-  parser.add_argument('--machine', default=get_machine_default(), help="machine argument to cl.exe")
-  parser.add_argument('--no-temp-dir', action='store_true', help="Do not use a temporary directory to create intermediaries")
-  parser.add_argument('--symbol-filter-regex', default=None, help="Only add symbols to forwarder DLL that match this regex")
+  parser.add_argument('--implementing-library', default=None,
+                      help="When the `input` DLL is only the reference for the symbols, but the actual implementation for them is elsewhere")
+  parser.add_argument('--machine', default=get_machine_default(),
+                      help="machine argument to cl.exe")
+  parser.add_argument('--no-temp-dir', action='store_true',
+                      help="Do not use a temporary directory to create intermediaries")
+  parser.add_argument('--symbol-filter-regex', default=None,
+                      help="Only add symbols to forwarder DLL that match this regex")
   return parser.parse_args(args)
 
 
@@ -119,7 +123,12 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
     for symbol in symbols:
       f.write(f"  {symbol} = {impl}.dll.{symbol}\n")
 
-  compiler.link(compiler.SHARED_LIBRARY, output_filename=f"{output}.dll", extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"], objects=["empty.obj", f"{input}.lib"])
+  compiler.link(
+    compiler.SHARED_LIBRARY,
+    output_filename=f"{output}.dll",
+    extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"],
+    objects=["empty.obj", f"{input}.lib"]
+  )
   run(f"copy {output}.dll {output_dll}")
 
 
