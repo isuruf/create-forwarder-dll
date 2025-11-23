@@ -59,7 +59,7 @@ def create(input_dll, output_dll, machine, symbol_filter):
   output_dir = os.path.dirname(output_dll)
   assert output_dll.endswith(".dll")
   output = os.path.basename(output_dll)[:-4]
-  
+
   # create empty object file to which we can attach symbol export list
   open("empty.c", "a").close()
   compiler = get_compiler()
@@ -82,7 +82,7 @@ def create(input_dll, output_dll, machine, symbol_filter):
     if line.strip().startswith("ordinal"):
       started = True
     if line.strip().startswith("Summary"):
-      break 
+      break
     if started and line.strip() != "":
       symbol = line.strip().split(" ")[-1]
       if symbol_filter is not None:
@@ -101,10 +101,10 @@ def create(input_dll, output_dll, machine, symbol_filter):
     f.write("EXPORTS\n")
     for symbol in symbols:
       f.write(f"  {symbol}\n")
-      
+
   # create import library with that list of symbols
   compiler.spawn([lib_exe, f"/def:{input}.def", f"/out:{input}.lib", f"/MACHINE:{machine}"])
-  
+
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
     f.write(f"LIBRARY {output}.dll\n")
