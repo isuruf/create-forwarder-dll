@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import subprocess
 import sys
 
@@ -46,10 +47,11 @@ def parse_args(args):
   parser.add_argument('output', help="path to output DLL")
   parser.add_argument('--machine', default=get_machine_default(), help="machine argument to cl.exe")
   parser.add_argument('--no-temp-dir', action='store_true', help="Do not use a temporary directory to create intermediaries")
+  parser.add_argument('--symbol-filter-regex', default=None, help="Only add symbols to forwarder DLL that match this regex")
   return parser.parse_args(args)
 
 
-def create(input_dll, output_dll, machine):
+def create(input_dll, output_dll, machine, symbol_filter):
   input_dir = os.path.dirname(input_dll)
   assert input_dll.endswith(".dll")
   input = os.path.basename(input_dll)[:-4]
@@ -68,6 +70,10 @@ def create(input_dll, output_dll, machine):
 
   compiler.spawn([cl_exe, "/c", "empty.c"])
 
+  if symbol_filter is not None:
+    print(f"received regex pattern to filter symbols: {symbol_filter!r}")
+    symbol_filter = re.compile(symbol_filter)
+
   # extract symbols from input
   dump = run(f"\"{dumpbin_exe}\" /EXPORTS {input_dll}")
   started = False
@@ -79,7 +85,15 @@ def create(input_dll, output_dll, machine):
       break 
     if started and line.strip() != "":
       symbol = line.strip().split(" ")[-1]
-      symbols.append(symbol)
+      if symbol_filter is not None:
+        if symbol_filter.match(symbol):
+          symbols.append(symbol)
+        else:
+          print(f"ignoring: {symbol}")
+      else:
+        symbols.append(symbol)
+
+  print(f"symbols being added to forwarder DLL:\n{'\n'.join(symbols)}")
 
   # create def file for explicit symbol export
   with open(f"{input}.def", "w") as f:
@@ -105,12 +119,12 @@ def create(input_dll, output_dll, machine):
 def main():
   args = parse_args(sys.argv[1:])
   if args.no_temp_dir:
-     create(args.input, args.output, args.machine)
+     create(args.input, args.output, args.machine, args.symbol_filter_regex)
   else:
      import tempfile
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         create(args.input, args.output, args.machine)
+         create(args.input, args.output, args.machine, args.symbol_filter_regex)
 
 
 if __name__ == "__main__":
