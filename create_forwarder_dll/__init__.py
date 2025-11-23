@@ -107,14 +107,14 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
   print(f"symbols being added to forwarder DLL:\n{'\n'.join(symbols)}")
 
   # create def file for explicit symbol export
-  with open(f"{input}.def", "w") as f:
+  with open(f"{input}_impl.def", "w") as f:
     f.write(f"LIBRARY {impl}.dll\n")
     f.write("EXPORTS\n")
     for symbol in symbols:
       f.write(f"  {symbol}\n")
 
   # create import library with that list of symbols
-  compiler.spawn([lib_exe, f"/def:{input}.def", f"/out:{input}.lib", f"/MACHINE:{machine}"])
+  compiler.spawn([lib_exe, f"/def:{input}_impl.def", f"/out:{input}_impl.lib", f"/MACHINE:{machine}"])
 
   # create DLL from empty object and the import library
   with open(f"{output}.def", "w") as f:
@@ -127,7 +127,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
     compiler.SHARED_LIBRARY,
     output_filename=f"{output}.dll",
     extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"],
-    objects=["empty.obj", f"{input}.lib"]
+    objects=["empty.obj", f"{input}_impl.lib"]
   )
   run(f"copy {output}.dll {output_dll}")
 
