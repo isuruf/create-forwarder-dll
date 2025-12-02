@@ -45,7 +45,7 @@ def parse_args(args):
   )
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
-  parser.add_argument('--implementing-library', default=None,
+  parser.add_argument('--implementing-dll-name', default=None,
                       help="When the `input` DLL is only the reference for the symbols, but the actual implementation for them is elsewhere")
   parser.add_argument('--machine', default=get_machine_default(),
                       help="machine argument to cl.exe")
@@ -135,12 +135,12 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
 def main():
   args = parse_args(sys.argv[1:])
   if args.no_temp_dir:
-     create(args.input, args.output, args.implementing_library, args.machine, args.symbol_filter_regex)
+     create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
   else:
      import tempfile
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         create(args.input, args.output, args.implementing_library, args.machine, args.symbol_filter_regex)
+         create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
 
 
 if __name__ == "__main__":
