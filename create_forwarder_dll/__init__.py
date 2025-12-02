@@ -121,7 +121,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
     f.write(f"LIBRARY {output}.dll\n")
     f.write("EXPORTS\n")
     for symbol in symbols:
-      f.write(f"  {symbol} = {impl}.dll.{symbol}\n")
+      f.write(f"  {symbol} = {impl}.{symbol}\n")
 
   compiler.link(
     compiler.SHARED_LIBRARY,

@@ -39,7 +39,8 @@ jobs:
           del /Q "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
-          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" --no-temp-dir
+          copy "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll"
+          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" --no-temp-dir
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
