@@ -14,8 +14,13 @@ jobs:
     permissions:
       id-token: write
     steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
     - name: build wheel
       run: |
+        pip install build
         python -m build .
 
     - name: Publish package distributions to PyPI
