@@ -1,8 +1,8 @@
 name: Deployment
 
 on:
-  push:
-    branches: [main]
+  release:
+    types: [created]
 
 jobs:
   pypi-publish:
@@ -20,11 +20,12 @@ jobs:
       with:
         python-version: '3.13'
 
+    - name: install python-build
+      run: |
+        pip install build
+
     - name: build wheel
       run: |
-        echo $PWD
-        ls -al .
-        pip install build
         python -m build .
 
     - name: Publish package distributions to PyPI
