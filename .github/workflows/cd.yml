@@ -20,6 +20,8 @@ jobs:
 
     - name: build wheel
       run: |
+        echo $PWD
+        ls -al .
         pip install build
         python -m build .
 

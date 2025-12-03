@@ -30,6 +30,8 @@ jobs:
       - name: install pkg
         shell: cmd /C CALL {0}
         run: |
+          echo $PWD
+          ls -al .
           pip install . -vv
 
       - name: create DLL
