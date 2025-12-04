@@ -104,7 +104,8 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
       else:
         symbols.append(symbol)
 
-  print(f"symbols being added to forwarder DLL:\n{'\n'.join(symbols)}")
+  symbol_str = '\n'.join(symbols)
+  print(f"symbols being added to forwarder DLL:\n{symbol_str}")
 
   # create def file for explicit symbol export
   with open(f"{input}_impl.def", "w") as f:
