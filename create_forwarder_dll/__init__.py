@@ -92,6 +92,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
   for line in dump.splitlines():
     if line.strip().startswith("ordinal"):
       started = True
+      continue
     if line.strip().startswith("Summary"):
       break
     if started and line.strip() != "":
