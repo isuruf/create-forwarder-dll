@@ -89,6 +89,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
   dump = run(f"\"{dumpbin_exe}\" /EXPORTS {input_dll}")
   started = False
   symbols = []
+  ordinals = {}
   for line in dump.splitlines():
     if line.strip().startswith("ordinal"):
       started = True
@@ -96,7 +97,9 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
     if line.strip().startswith("Summary"):
       break
     if started and line.strip() != "":
+      ordinal = int(line.split()[0])
       symbol = line.strip().split(" ")[-1]
+      ordinals[symbol] = ordinal
       if symbol_filter is not None:
         if symbol_filter.match(symbol):
           symbols.append(symbol)
@@ -105,7 +108,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
       else:
         symbols.append(symbol)
 
-  symbol_str = '\n'.join(symbols)
+  symbol_str = '\n'.join(f"{symbol} @{ordinals[symbol]}" for symbol in symbols)
   print(f"symbols being added to forwarder DLL:\n{symbol_str}")
 
   # create def file for explicit symbol export
@@ -123,7 +126,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
     f.write(f"LIBRARY {output}.dll\n")
     f.write("EXPORTS\n")
     for symbol in symbols:
-      f.write(f"  {symbol} = {impl}.dll.{symbol}\n")
+      f.write(f"  {symbol} = {impl}.dll.{symbol} @{ordinals[symbol]}\n")
 
   compiler.link(
     compiler.SHARED_LIBRARY,
