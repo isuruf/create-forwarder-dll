@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -19,12 +20,31 @@ processor_architecture_map = {
   "x86": "X86",
 }
 
+# machine argument to cl.exe -> (mingw target triplet, dlltool machine)
+mingw_machine_map = {
+  "x64": ("x86_64-w64-mingw32", "i386:x86-64"),
+  "arm64": ("aarch64-w64-mingw32", "arm64"),
+  "x86": ("i686-w64-mingw32", "i386"),
+}
+
 
 def get_compiler():
   from distutils._msvccompiler import MSVCCompiler
   m = MSVCCompiler()
   m.initialize()
   return m
+
+
+def get_dlltool(machine):
+  dlltool = os.environ.get("DLLTOOL")
+  if dlltool:
+    return dlltool
+  triplet = mingw_machine_map[machine.lower()][0]
+  for name in [f"{triplet}-dlltool", "dlltool", "llvm-dlltool"]:
+    dlltool = shutil.which(name)
+    if dlltool is not None:
+      return dlltool
+  raise RuntimeError("Could not find dlltool to create a mingw import library. Set the DLLTOOL environment variable")
 
 
 def run(arg):
@@ -46,7 +66,8 @@ def parse_args(args):
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
   parser.add_argument('import_library', nargs='?', default=None,
-                      help="path to install the import library of the output DLL")
+                      help="path to install the import library of the output DLL. "
+                      "If it ends with .dll.a, a mingw import library is created using dlltool")
   parser.add_argument('--implementing-dll-name', default=None,
                       help="When the `input` DLL is only the reference for the symbols, but the actual implementation for them is elsewhere")
   parser.add_argument('--machine', default=get_machine_default(),
@@ -68,7 +89,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
   output = os.path.basename(output_dll)[:-4]
 
   if import_lib is not None:
-    assert import_lib.endswith(".lib")
+    assert import_lib.endswith(".lib") or import_lib.endswith(".dll.a")
 
   if impl_dll is not None:
     assert impl_dll.endswith(".dll")
@@ -137,7 +158,18 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
     objects=["empty.obj", f"{input}_impl.lib"]
   )
   run(f"copy {output}.dll {output_dll}")
-  if import_lib is not None:
+  if import_lib is not None and import_lib.endswith(".dll.a"):
+    # dlltool reads `name = other` as an alias, so give it the plain export list
+    with open(f"{output}_mingw.def", "w") as f:
+      f.write(f"LIBRARY {output}.dll\n")
+      f.write("EXPORTS\n")
+      for symbol in symbols:
+        f.write(f"  {symbol}\n")
+    dlltool_machine = mingw_machine_map[machine.lower()][1]
+    subprocess.check_call([get_dlltool(machine), "-m", dlltool_machine, "-d", f"{output}_mingw.def",
+                           "-D", f"{output}.dll", "-l", f"{output}.dll.a"])
+    run(f"copy {output}.dll.a {import_lib}")
+  elif import_lib is not None:
     run(f"copy {output}.lib {import_lib}")
 
 

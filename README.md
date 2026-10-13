@@ -19,7 +19,9 @@ Create a DLL that forwards to another DLL
 positional arguments:
   input                 path to input DLL
   output                path to output DLL
-  import_library        path to install the import library of the output DLL
+  import_library        path to install the import library of the output DLL.
+                        If it ends with .dll.a, a mingw import library is
+                        created using dlltool
 
 options:
   -h, --help            show this help message and exit
