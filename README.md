@@ -12,14 +12,14 @@ usage: create_dll_forwarder [-h]
                             [--implementing-dll-name IMPLEMENTING_DLL_NAME]
                             [--machine MACHINE] [--no-temp-dir]
                             [--symbol-filter-regex SYMBOL_FILTER_REGEX]
-                            [--import-library IMPORT_LIBRARY]
-                            input output
+                            input output [import_library]
 
 Create a DLL that forwards to another DLL
 
 positional arguments:
   input                 path to input DLL
   output                path to output DLL
+  import_library        path to install the import library of the output DLL
 
 options:
   -h, --help            show this help message and exit
@@ -33,6 +33,4 @@ options:
   --symbol-filter-regex SYMBOL_FILTER_REGEX
                         Only add symbols to forwarder DLL that match this
                         regex
-  --import-library IMPORT_LIBRARY
-                        path to install the import library of the output DLL
 ```

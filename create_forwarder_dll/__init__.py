@@ -45,6 +45,8 @@ def parse_args(args):
   )
   parser.add_argument('input', help="path to input DLL")
   parser.add_argument('output', help="path to output DLL")
+  parser.add_argument('import_library', nargs='?', default=None,
+                      help="path to install the import library of the output DLL")
   parser.add_argument('--implementing-dll-name', default=None,
                       help="When the `input` DLL is only the reference for the symbols, but the actual implementation for them is elsewhere")
   parser.add_argument('--machine', default=get_machine_default(),
@@ -53,8 +55,6 @@ def parse_args(args):
                       help="Do not use a temporary directory to create intermediaries")
   parser.add_argument('--symbol-filter-regex', default=None,
                       help="Only add symbols to forwarder DLL that match this regex")
-  parser.add_argument('--import-library', default=None,
-                      help="path to install the import library of the output DLL")
   return parser.parse_args(args)
 
 
