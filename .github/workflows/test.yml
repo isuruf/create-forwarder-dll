@@ -21,6 +21,7 @@ jobs:
             numpy
             libblas=*=*openblas
             liblapacke=*=*openblas
+            llvm-tools
             pip
 
       - name: micromamba info (cmd.exe)
@@ -40,7 +41,10 @@ jobs:
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           del /Q "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\openblas.dll" "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll"
-          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" --no-temp-dir
+          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll" "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\lib\\libblas_forwarder.lib" --no-temp-dir
+          if not exist "%CONDA_PREFIX%\\Library\\lib\\libblas_forwarder.lib" exit 1
+          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\openblas.0.dll" "%RUNNER_TEMP%\\libblas.dll" "%RUNNER_TEMP%\\libblas.dll.a" --no-temp-dir
+          llvm-nm "%RUNNER_TEMP%\\libblas.dll.a" | findstr /C:"__imp_cblas_dgemm" || exit 1
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\libcblas.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapack.dll"
           copy "%CONDA_PREFIX%\\Library\\bin\\libblas.dll" "%CONDA_PREFIX%\\Library\\bin\\liblapacke.dll"
