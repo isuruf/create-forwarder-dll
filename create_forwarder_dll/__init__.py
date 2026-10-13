@@ -143,9 +143,14 @@ def main():
      create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
   else:
      import tempfile
+     cwd = os.getcwd()
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
+         try:
+             create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
+         finally:
+             # Windows cannot delete the current working directory
+             os.chdir(cwd)
 
 
 if __name__ == "__main__":
