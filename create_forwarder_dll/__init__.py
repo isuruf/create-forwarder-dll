@@ -115,6 +115,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
   dump = run(f"\"{dumpbin_exe}\" /EXPORTS {input_dll}")
   started = False
   symbols = []
+  ordinals = {}
   for line in dump.splitlines():
     if line.strip().startswith("ordinal"):
       started = True
@@ -122,7 +123,9 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
     if line.strip().startswith("Summary"):
       break
     if started and line.strip() != "":
+      ordinal = int(line.split()[0])
       symbol = line.strip().split(" ")[-1]
+      ordinals[symbol] = ordinal
       if symbol_filter is not None:
         if symbol_filter.match(symbol):
           symbols.append(symbol)
@@ -131,7 +134,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
       else:
         symbols.append(symbol)
 
-  symbol_str = '\n'.join(symbols)
+  symbol_str = '\n'.join(f"{symbol} @{ordinals[symbol]}" for symbol in symbols)
   print(f"symbols being added to forwarder DLL:\n{symbol_str}")
 
   # create def file for explicit symbol export
@@ -149,7 +152,7 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
     f.write(f"LIBRARY {output}.dll\n")
     f.write("EXPORTS\n")
     for symbol in symbols:
-      f.write(f"  {symbol} = {impl}.dll.{symbol}\n")
+      f.write(f"  {symbol} = {impl}.dll.{symbol} @{ordinals[symbol]}\n")
 
   compiler.link(
     compiler.SHARED_LIBRARY,
@@ -179,9 +182,14 @@ def main():
      create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex, args.import_library)
   else:
      import tempfile
+     cwd = os.getcwd()
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex, args.import_library)
+         try:
+             create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex, args.import_library)
+         finally:
+             # Windows cannot delete the current working directory
+             os.chdir(cwd)
 
 
 if __name__ == "__main__":
