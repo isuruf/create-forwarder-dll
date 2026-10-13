@@ -53,10 +53,12 @@ def parse_args(args):
                       help="Do not use a temporary directory to create intermediaries")
   parser.add_argument('--symbol-filter-regex', default=None,
                       help="Only add symbols to forwarder DLL that match this regex")
+  parser.add_argument('--import-library', default=None,
+                      help="path to install the import library of the output DLL")
   return parser.parse_args(args)
 
 
-def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
+def create(input_dll, output_dll, impl_dll, machine, symbol_filter, import_lib):
   print(f"got input DLL {input_dll}, output DLL {output_dll}" + f", implenting DLL {impl_dll}" * (impl_dll is not None))
 
   assert input_dll.endswith(".dll")
@@ -64,6 +66,9 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
 
   assert output_dll.endswith(".dll")
   output = os.path.basename(output_dll)[:-4]
+
+  if import_lib is not None:
+    assert import_lib.endswith(".lib")
 
   if impl_dll is not None:
     assert impl_dll.endswith(".dll")
@@ -128,21 +133,23 @@ def create(input_dll, output_dll, impl_dll, machine, symbol_filter):
   compiler.link(
     compiler.SHARED_LIBRARY,
     output_filename=f"{output}.dll",
-    extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}"],
+    extra_preargs=[f"/DEF:{output}.def", f"/MACHINE:{machine}", f"/IMPLIB:{output}.lib"],
     objects=["empty.obj", f"{input}_impl.lib"]
   )
   run(f"copy {output}.dll {output_dll}")
+  if import_lib is not None:
+    run(f"copy {output}.lib {import_lib}")
 
 
 def main():
   args = parse_args(sys.argv[1:])
   if args.no_temp_dir:
-     create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
+     create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex, args.import_library)
   else:
      import tempfile
      with tempfile.TemporaryDirectory() as tmpdir:
          os.chdir(tmpdir)
-         create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex)
+         create(args.input, args.output, args.implementing_dll_name, args.machine, args.symbol_filter_regex, args.import_library)
 
 
 if __name__ == "__main__":

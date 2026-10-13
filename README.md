@@ -8,16 +8,31 @@ Needs a Visual Studio installation to run `cl.exe`, `dumpbin.exe`
 and `lib.exe`.
 
 ```
-usage: create_dll_forwarder [-h] [--machine MACHINE] [--no-temp-dir] input output
+usage: create_dll_forwarder [-h]
+                            [--implementing-dll-name IMPLEMENTING_DLL_NAME]
+                            [--machine MACHINE] [--no-temp-dir]
+                            [--symbol-filter-regex SYMBOL_FILTER_REGEX]
+                            [--import-library IMPORT_LIBRARY]
+                            input output
 
 Create a DLL that forwards to another DLL
 
 positional arguments:
-  input              path to input DLL
-  output             path to output DLL
+  input                 path to input DLL
+  output                path to output DLL
 
 options:
-  -h, --help         show this help message and exit
-  --machine MACHINE  machine argument to cl.exe
-  --no-temp-dir      Do not use a temporary directory to create intermediaries
+  -h, --help            show this help message and exit
+  --implementing-dll-name IMPLEMENTING_DLL_NAME
+                        When the `input` DLL is only the reference for the
+                        symbols, but the actual implementation for them is
+                        elsewhere
+  --machine MACHINE     machine argument to cl.exe
+  --no-temp-dir         Do not use a temporary directory to create
+                        intermediaries
+  --symbol-filter-regex SYMBOL_FILTER_REGEX
+                        Only add symbols to forwarder DLL that match this
+                        regex
+  --import-library IMPORT_LIBRARY
+                        path to install the import library of the output DLL
 ```
