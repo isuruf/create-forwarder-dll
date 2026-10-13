@@ -49,3 +49,34 @@ jobs:
         shell: cmd /C CALL {0}
         run: >-
           python -c "import numpy"
+
+  openmp-ordinals:
+    # https://github.com/conda-forge/openmp-feedstock/issues/236
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: test-env
+          init-shell: cmd.exe
+          create-args: >-
+            python
+            llvm-openmp
+            pip
+
+      - name: install pkg
+        shell: cmd /C CALL {0}
+        run: |
+          pip install . -vv
+
+      - name: create libiomp5md.dll forwarder
+        shell: cmd /C CALL {0}
+        run: |
+          mkdir "%RUNNER_TEMP%\\openmp"
+          create-forwarder-dll.exe "%CONDA_PREFIX%\\Library\\bin\\libomp.dll" "%RUNNER_TEMP%\\openmp\\libiomp5md.dll"
+
+      - name: check ordinals
+        shell: cmd /C CALL {0}
+        run: >-
+          python tests\\check_ordinals.py "%CONDA_PREFIX%\\Library\\bin\\libomp.dll" "%RUNNER_TEMP%\\openmp\\libiomp5md.dll"
